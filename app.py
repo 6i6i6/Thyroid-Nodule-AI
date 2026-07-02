@@ -1,11 +1,16 @@
 import streamlit as st
 from PIL import Image
 import os
+import sys
+
+# ضمان إدراج المسار الحالي ليتعرف السيرفر على الملفات المجاورة
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 try:
     from detector import ThyroidDetector
-except:
+except Exception as e:
     ThyroidDetector = None
+    import_error_msg = str(e)
 
 # -----------------------------
 # Page Config
@@ -121,7 +126,6 @@ if os.path.exists(DATASET_DIR):
 selected_image_path = None
 
 with st.sidebar:
-    # تعديل العنوان والنصوص لتصبح احترافية ومطابقة للعدد الحالي
     st.markdown("<h2 style='color:#2ecc71; text-align:center;'>📁 Dataset Samples</h2>", unsafe_allow_html=True)
     st.markdown(f"<p style='text-align:center; color:#aaa;'>Found <b>{len(image_files)}</b> test cases available.</p>", unsafe_allow_html=True)
     st.write("---")
@@ -145,12 +149,16 @@ with st.sidebar:
 # -----------------------------
 # Header
 # -----------------------------
-logo = Image.open("assets/zoro.png")
+logo_path = "assets/zoro.png"
+logo = None
+if os.path.exists(logo_path):
+    logo = Image.open(logo_path)
 
 c1, c2 = st.columns([1,6])
 
 with c1:
-    st.image(logo, width=120)
+    if logo:
+        st.image(logo, width=120)
 
 with c2:
     st.markdown(
@@ -167,33 +175,13 @@ with c2:
 # -----------------------------
 st.markdown("""
 <div class="project-card">
-
 <h3 style="color:#2ecc71;">📋 Project Information</h3>
-
 <table style="width:100%;color:white;font-size:17px">
-
-<tr>
-<td><b>Student</b></td>
-<td>Shams Ghassan Allawi</td>
-</tr>
-
-<tr>
-<td><b>Student ID</b></td>
-<td>1230149</td>
-</tr>
-
-<tr>
-<td><b>Supervisor</b></td>
-<td>Dr. Abbas Al-Zubaidi</td>
-</tr>
-
-<tr>
-<td><b>Course</b></td>
-<td>AI in Healthcare</td>
-</tr>
-
+<tr><td><b>Student</b></td><td>Shams Ghassan Allawi</td></tr>
+<tr><td><b>Student ID</b></td><td>1230149</td></tr>
+<tr><td><b>Supervisor</b></td><td>Dr. Abbas Al-Zubaidi</td></tr>
+<tr><td><b>Course</b></td><td>AI in Healthcare</td></tr>
 </table>
-
 </div>
 """, unsafe_allow_html=True)
 
@@ -235,7 +223,6 @@ st.divider()
 # Results
 # -----------------------------
 if final_image:
-
     left, right = st.columns(2)
 
     with left:
@@ -250,7 +237,7 @@ if final_image:
 
         if analyze:
             if ThyroidDetector is None:
-                st.error("detector.py not found.")
+                st.error(f"Detector module layout error. Details: {import_error_msg}")
             else:
                 try:
                     detector = ThyroidDetector()
@@ -304,9 +291,8 @@ if final_image:
                             * Disclaimer: This application provides objective, structured visual observations to assist clinical workflows and does not provide an autonomous clinical diagnosis.
                         </p>
                         """, unsafe_allow_html=True)
-
                     else:
-                        st.warning("No nodule detected.")
+                        st.warning("No nodule detected in this sample.")
                 except Exception as e:
                     st.error(str(e))
         else:
