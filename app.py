@@ -1,7 +1,11 @@
-import streamlit as st
-from PIL import Image
 import os
 import sys
+
+# إجبار بايثون على تخطي مشاكل المجموعات الرسومية للنظام أونلاين
+os.environ["OPENCV_VIDEOIO_PRIORITY_BACKEND"] = "0"
+
+import streamlit as st
+from PIL import Image
 
 # ضمان إدراج المسار الحالي ليتعرف السيرفر على الملفات المجاورة
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
